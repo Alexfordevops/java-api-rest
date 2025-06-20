@@ -37,9 +37,9 @@ services:
 
 secrets:
   db_password:
-    file: ./secrets/db_password.txt
+    file: ../secrets/db_password.txt
   jwt_secret:
-    file: ./secrets/jwt_secret.txt
+    file: ../secrets/jwt_secret.txt
 
 volumes:
   db_data:
