@@ -2,7 +2,8 @@ version: "3.8"
 
 services:
   api:
-    build: .
+    build:  
+      context: ../Core
     container_name: java-api
     depends_on:
       - db
