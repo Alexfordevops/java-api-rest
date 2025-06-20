@@ -31,15 +31,27 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
         String username = body.get("username");
         String password = body.get("password");
 
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        UserDetails user = userDetailsService.loadUserByUsername(username);
-        String token = jwtUtil.generateToken(user.getUsername());
+        try {
+            // Verifica credenciais
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            // Gera token se tudo estiver ok
+            UserDetails user = userDetailsService.loadUserByUsername(username);
+            String token = jwtUtil.generateToken(user.getUsername());
 
-        return Map.of("token", token);
+            return ResponseEntity.ok(Map.of("token", token));
+
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Credenciais inválidas"));
+
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erro interno ao autenticar"));
+        }
     }
 
     @PostMapping("/register")
@@ -48,7 +60,7 @@ public class AuthController {
             Client user = authService.register(request);
             return ResponseEntity.status(HttpStatus.CREATED).body("Usuário registrado com sucesso");
         } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
 }
