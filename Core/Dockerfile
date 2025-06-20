@@ -14,13 +14,14 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Copia o JAR da etapa anterior
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/Core-0.0.1-SNAPSHOT.war app.war
 
-# Copia os arquivos de segredos (se forem montados via docker secrets)
-# Docker Secrets devem ser montados externamente com `docker-compose`
+# Copia o script de espera
+COPY wait-for-postgres.sh ./wait-for-postgres.sh
+RUN chmod +x ./wait-for-postgres.sh
 
 # Expõe a porta
 EXPOSE 8080
 
 # Executa a aplicação
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["./wait-for-postgres.sh", "java", "-jar", "app.war"]
