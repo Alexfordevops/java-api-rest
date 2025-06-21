@@ -15,35 +15,38 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // Caminho do arquivo com a chave secreta
-    @Value("${jwt.secret.file}")
+    @Value("${jwt.secret.file:}")
     private String jwtSecretFilePath;
 
     private Key SECRET_KEY;
 
-    // Token expira em 24 horas
+    // 24 horas
     private static final long EXPIRATION_TIME_MS = 1000 * 60 * 60 * 24;
 
-    /**
-     * Lê o conteúdo da chave secreta do arquivo configurado.
-     * Executado automaticamente após a injeção de dependência do Spring.
-     */
     @PostConstruct
     public void loadSecretKey() {
         try {
-            String secret = Files.readString(Path.of(jwtSecretFilePath)).trim();
-            if (secret.length() < 32) {
-                throw new IllegalArgumentException("A chave JWT precisa ter pelo menos 32 caracteres para HS256.");
+            // Fallback: se jwtSecretFilePath estiver vazio, tenta pegar direto da variável de ambiente
+            if (jwtSecretFilePath == null || jwtSecretFilePath.isBlank()) {
+                jwtSecretFilePath = System.getenv("JWT_SECRET_FILE");
             }
+
+            if (jwtSecretFilePath == null || jwtSecretFilePath.isBlank()) {
+                throw new IllegalStateException("Variável 'jwt.secret.file' ou 'JWT_SECRET_FILE' não definida.");
+            }
+
+            String secret = Files.readString(Path.of(jwtSecretFilePath)).trim();
+
+            if (secret.length() < 32) {
+                throw new IllegalArgumentException("A chave JWT precisa ter pelo menos 32 caracteres.");
+            }
+
             this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao ler o arquivo com a chave secreta JWT", e);
+            throw new RuntimeException("Erro ao ler o arquivo com a chave secreta JWT: " + jwtSecretFilePath, e);
         }
     }
 
-    /**
-     * Gera um token JWT com base no nome do usuário.
-     */
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
@@ -53,9 +56,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    /**
-     * Valida se o token é assinado corretamente e não expirou.
-     */
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -68,9 +68,6 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * Extrai o nome do usuário (subject) do token JWT.
-     */
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
