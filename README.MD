@@ -33,4 +33,4 @@ PUT http://localhost:8080/api/clients/{id} → Atualizar cliente por id
 1. Instalar Docker e Docker compose
 2. Clonar o repositório 
 3. Iniciar o docker swarm → `docker swarm init`
-4. Executar o docker compose → `docker compose up -- build`
+4. Executar o docker compose → `docker compose up --build`
