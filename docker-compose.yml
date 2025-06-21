@@ -3,7 +3,7 @@ version: "3.8"
 services:
   api:
     build:
-      context: /Core  # Caminho onde está seu Dockerfile, app.jar, entrypoint.sh e wait-for-db.sh
+      context: /Core  # Caminho do Dockerfile
     container_name: java-api
     depends_on:
       - db
@@ -21,10 +21,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydb
       SPRING_DATASOURCE_USERNAME: postgres
 
-      # JWT_SECRET_FILE será lido automaticamente no entrypoint.sh
     secrets:
-      - db_password
-      - jwt_secret
+      - db_password 
+      - jwt_secret # JWT_SECRET_FILE será lido automaticamente no entrypoint.sh
     networks:
       - backend
 
@@ -45,9 +44,9 @@ services:
 
 secrets:
   db_password:
-    file: ./secrets/db_password.txt  # Você deve criar este arquivo com a senha do banco
+    file: ./secrets/db_password.txt  # Senha do banco
   jwt_secret:
-    file: ./secrets/jwt_secret.txt   # Este arquivo deve conter a chave JWT (mínimo 32 caracteres)
+    file: ./secrets/jwt_secret.txt   # Chave JWT
 
 volumes:
   db_data:

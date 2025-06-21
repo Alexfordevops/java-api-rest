@@ -21,6 +21,9 @@ COPY wait-for-db.sh ./wait-for-db.sh
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./wait-for-db.sh ./entrypoint.sh
 
+#Instala o psql client
+RUN apt-get update && apt-get install -y postgresql-client
+
 # Expõe a porta
 EXPOSE 8080
 
