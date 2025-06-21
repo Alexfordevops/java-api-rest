@@ -3,7 +3,7 @@ version: "3.8"
 services:
   api:
     build:
-      context: /Core  # Caminho do Dockerfile
+      context: ./Core  # Caminho do Dockerfile
     container_name: java-api
     depends_on:
       - db
