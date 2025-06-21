@@ -40,7 +40,7 @@ Thumbs.db
 
 # Arquivos de ambiente
 .env
-application.properties
+#application.properties
 application.yml
 
 # Testes temporários
